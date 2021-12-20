@@ -25,7 +25,14 @@ def load_cows(filename):
     a dictionary of cow name (string), weight (int) pairs
     """
     # TODO: Your code here
-    pass
+    cows = dict()
+    file = open(filename)
+    lines = file.readlines()
+    for line in lines:
+        line_list = line.split(',')
+        cows[line_list[0]] = line_list[1]
+    
+    return cows
 
 # Problem 2
 def greedy_cow_transport(cows,limit=10):
@@ -51,7 +58,26 @@ def greedy_cow_transport(cows,limit=10):
     trips
     """
     # TODO: Your code here
-    pass
+    keyFunction = lambda x: cows[x]
+    cows_sorted = sorted(cows,key=keyFunction,reverse=True)
+    result = []
+    while len(cows_sorted) > 0:
+        new_trip = []
+        trip_weight = 0
+        for i in range(len(cows_sorted)):
+            if(trip_weight + int(cows[cows_sorted[i]])) <= limit:
+                new_trip.append(cows_sorted[i])
+        result.append(new_trip)
+        for item in new_trip:
+            cows_sorted.remove(item)
+            
+    return result
+
+def trip_weight(item,cows):
+    weight = 0
+    for i in item:
+        weight += int(cows[i])
+    return weight
 
 # Problem 3
 def brute_force_cow_transport(cows,limit=10):
@@ -76,7 +102,23 @@ def brute_force_cow_transport(cows,limit=10):
     trips
     """
     # TODO: Your code here
-    pass
+    keyFunction = lambda x: cows[x]
+    cows_sorted = sorted(cows,key=keyFunction,reverse=True)
+    minimize = len(cows_sorted)
+    result = []
+    for partition in get_partitions(cows_sorted):
+        legal = True
+        length = len(partition)
+        for item in partition:
+            if trip_weight(item,cows) > limit:
+                legal = False
+                break
+        if legal:
+            if length < minimize:
+                minimize = length
+                result = partition
+    
+    return result
         
 # Problem 4
 def compare_cow_transport_algorithms():
@@ -93,4 +135,13 @@ def compare_cow_transport_algorithms():
     Does not return anything.
     """
     # TODO: Your code here
-    pass
+    filename = "ps1_cow_data.txt"
+    cows = load_cows(filename)
+    start = time.time()
+    greedy_cow_transport(cows)
+    end = time.time()
+    print("greedy algorithm spend:",(end-start))
+    start = time.time()
+    brute_force_cow_transport(cows)
+    end = time.time()
+    print("brute force algorithm spend:",(end-start))
