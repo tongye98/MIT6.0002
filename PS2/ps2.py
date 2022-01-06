@@ -45,6 +45,25 @@ def load_map(map_filename):
 
     # TODO
     print("Loading map from file...")
+    entry_all = []
+    with open(map_filename,'r') as f:
+        for line in f:
+            entry = line.strip('\n').split(' ')
+            entry_all.append(entry)
+
+    graph = Digraph()
+    for entry in entry_all:
+        src = Node(str(entry[0]))
+        dest = Node(str(entry[1]))
+        if not graph.has_node(src):
+            graph.add_node(src)
+        if not graph.has_node(dest):
+            graph.add_node(dest)
+        edge = WeightedEdge(src, dest, int(entry[2]), int(entry[3]))
+        graph.add_edge(edge)
+    
+    return graph
+
 
 # Problem 2c: Testing load_map
 # Include the lines used to test load_map below, but comment them out
@@ -95,8 +114,29 @@ def get_best_path(digraph, start, end, path, max_dist_outdoors, best_dist,
         If there exists no path that satisfies max_total_dist and
         max_dist_outdoors constraints, then return None.
     """
-    # TODO
-    pass
+    path[0] = path[0] + [start]
+    if path[2] > max_dist_outdoors: 
+        return None
+    if digraph.has_node(digraph.get_node(start)) is False or digraph.has_node(digraph.get_node(end)) is False:
+        raise ValueError('no start node or end node')
+    elif start == end:
+        return(path[0], path[1])
+    else:
+        for edge in digraph.edges[digraph.get_node(start)]:
+            node = edge.get_destination()
+            node = node.get_name()
+            distance = edge.get_total_distance() + path[1]
+            outdoors = edge.get_outdoor_distance() + path[2]
+            if node not in path[0]:
+                updated_path = [path[0], distance, outdoors]
+                new_path = get_best_path(digraph, node, end, updated_path, max_dist_outdoors, best_dist, best_path)
+                if new_path:
+                    if  not best_dist or new_path[1] < best_dist:
+                        best_path, best_dist = new_path[0], new_path[1]
+
+    return (best_path, best_dist)
+
+            
 
 
 # Problem 3c: Implement directed_dfs
@@ -129,8 +169,17 @@ def directed_dfs(digraph, start, end, max_total_dist, max_dist_outdoors):
         max_dist_outdoors constraints, then raises a ValueError.
     """
     # TODO
-    pass
-
+    path = [[],0,0]
+    result = get_best_path(digraph,start,end,path,max_dist_outdoors,best_dist=None, best_path=None)
+    if result[1] is None:
+        print('There is no result that meets constraints!')
+        raise ValueError
+    else:
+        if result[1] > max_total_dist:
+            print('Result exceeded max_total_dist')
+            raise ValueError
+        else:
+            return result[0]
 
 # ================================================================
 # Begin tests -- you do not need to modify anything below this line
