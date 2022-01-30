@@ -66,6 +66,7 @@ class WeightedEdge(Edge):
         return self.outdoor_distance
 
     def __str__(self):
+        # str()
         return '{}->{} ({}, {})'.format(str(self.src),str(self.dest),self.total_distance,self.outdoor_distance)
 
 
